@@ -32,7 +32,24 @@ class StorageServiceImpl implements StorageService{
       await storage.write(key: 'files', value: _serializeFileModelList(fileModels));
     }
   }
-
+  
+  @override
+  Future<List<FileModel>> deleteFile(FileModel file) async{
+    final storage = FlutterSecureStorage();
+    final files = await storage.read(key: 'files');
+    if(files != null) {
+      List<FileModel> fileModels = _deserializeFileModelList(files);
+      int index = fileModels.indexWhere((e)=> e.path == file.path);
+      if(index != -1){
+        fileModels.removeAt(index);
+      }
+      await storage.write(key: 'files', value: _serializeFileModelList(fileModels));
+      return fileModels;
+    }else{
+      return [];
+    }
+  }
+  
   String _serializeFileModelList(List<FileModel> fileModels) {
     return json.encode(fileModels.map((file) => {
       'path': file.path,

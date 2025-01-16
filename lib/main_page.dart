@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pdf_view/models/file_model.dart';
@@ -78,7 +79,17 @@ class _FileHandlerScreenState extends State<FileHandlerScreenFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Недавнее')),
+      appBar: AppBar(
+          title: Row(
+        children: [
+          Text('Недавнее'),
+          const Spacer(),
+          InkWell(
+            onTap: () => _showMoreInfoModal.call(context),
+            child: Icon(Icons.question_mark),
+          )
+        ],
+      )),
       backgroundColor: Colors.white,
       body: BlocConsumer<MainPageBloc, FileState>(
         listener: (context, state) {
@@ -93,33 +104,95 @@ class _FileHandlerScreenState extends State<FileHandlerScreenFlow> {
           }
         },
         builder: (context, state) {
-          return Column(
+          return SingleChildScrollView(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (state is FileOpenedLoadingState) CircularProgressIndicator(),
+              if (state is FileOpenedLoadingState)
+                Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.black.withOpacity(0.5),
+                    ),
+                  ),
+                ),
               Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Wrap(
-                      spacing: 10.0,
-                      runSpacing: 10.0,
-                      children: List.generate(fileModels.length + 1, (i) {
-                        if (i == 0) {
-                          return OpenButtonWidget(onTap: (FileModel file) {
-                            _blocChat(context).add(FileOpenedOutDeviceEvent(file: file));
-                          });
-                        } else {
-                          return PreviewPdfFileWidget(
-                            onTap: () {
-                              _blocChat(context)
-                                  .add(FileOpenedInDeviceEvent(file: fileModels[i - 1]));
-                            },
-                            file: fileModels[i - 1],
-                          );
-                        }
-                      }))),
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.start,
+                    runAlignment: WrapAlignment.start,
+                    alignment: WrapAlignment.start,
+                    spacing: 10.0,
+                    runSpacing: 10.0,
+                    children: List.generate(fileModels.length + 1, (i) {
+                      if (i == 0) {
+                        return OpenButtonWidget(onTap: (FileModel file) {
+                          _blocChat(context).add(FileOpenedOutDeviceEvent(file: file));
+                        });
+                      } else {
+                        return PreviewPdfFileWidget(
+                          onTapView: () {
+                            _blocChat(context)
+                                .add(FileOpenedInDeviceEvent(file: fileModels[i - 1]));
+                          },
+                          onTapDelete: () {
+                            _blocChat(context).add(FileDeleteInAppEvent(file: fileModels[i - 1]));
+                          },
+                          file: fileModels[i - 1],
+                        );
+                      }
+                    })),
+              ),
             ],
-          );
+          ));
         },
       ),
+    );
+  }
+
+  void _showMoreInfoModal(
+    BuildContext context,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          color: Colors.white,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "О приложении",
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Expanded(
+                  child: Column(
+                children: [
+                  Text(
+                      'На этой странице можно открыть для просмотра pdf файлы с вашего устройства.'),
+                  SizedBox(height: 6),
+                  Text(
+                      'На этой странице отображаются pdf файлы которые когда либо были открыты через это приложение. Если по какой-либо причине раннее добавленный файл перестал отображаться в приложении, то скорее всего этот файл был удален с устройства или перемещен в другую папку, так как это приложение не хранит копию файлов, оно хранит пути к файлам которые были открыты через это приложение.'),
+                  SizedBox(height: 10),
+                  Text(
+                      'Чтобы удалить файл из списка, нужно удерживать нажатие на иконке файла, после которого откроется модальное окно в котором можно удалить файл.\nУдаление файла не удалит файл с устройства, файл удалиться только в приложении.'),
+                  SizedBox(height: 10),
+                ],
+              )),
+            ],
+          ),
+        );
+      },
     );
   }
 }

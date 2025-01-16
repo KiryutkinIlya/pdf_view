@@ -19,7 +19,6 @@ class MainPageBloc extends Bloc<FileEvent, FileState> {
         files = await StorageServiceImpl().getListFile();
       }
       emit(FileLoadedResentState(files: files));
-
     });
 
     on<FileGetRecentEvent>((event, emit) async {
@@ -29,11 +28,18 @@ class MainPageBloc extends Bloc<FileEvent, FileState> {
     });
 
     on<FileOpenedInDeviceEvent>((event, emit) async {
+      emit(FileOpenedLoadingState());
       emit(FileOpenedState(event.file.path));
     });
 
     on<FileResetEvent>((event, emit) {
       emit(FileInitialState());
+    });
+
+    on<FileDeleteInAppEvent>((event, emit) async {
+      emit(FileOpenedLoadingState());
+      List<FileModel> files = await StorageServiceImpl().deleteFile(event.file);
+      emit(FileLoadedResentState(files: files));
     });
   }
 }

@@ -33,6 +33,13 @@ class FileOpenedInDeviceEvent extends FileEvent {
   @override
   List<Object?> get props => [file];
 }
+class FileDeleteInAppEvent extends FileEvent {
+  final FileModel file;
 
+  const FileDeleteInAppEvent({required this.file});
+
+  @override
+  List<Object?> get props => [file];
+}
 // Событие для сброса состояния
 class FileResetEvent extends FileEvent {}

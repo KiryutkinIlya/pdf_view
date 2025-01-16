@@ -13,9 +13,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PDF View',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.black.withOpacity(0.5),
           foregroundColor: Colors.white,
           elevation: 4,
         ),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -27,12 +26,6 @@ class _PageViewPdfState extends State<PageViewPdf> {
 
   @override
   void initState() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
       fromDevice(widget.pathFileInDevice).then((f) {
         setState(() {
           remoteFilePath = f.path;
@@ -42,7 +35,6 @@ class _PageViewPdfState extends State<PageViewPdf> {
   }
 
   Future<File> fromDevice(String filename) async {
-    // To open from assets, you can copy them to the app storage folder, and the access them "locally"
     Completer<File> completer = Completer();
     try {
       File file = File("$filename");
@@ -56,11 +48,6 @@ class _PageViewPdfState extends State<PageViewPdf> {
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    if (Platform.isIOS) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-          overlays: [SystemUiOverlay.top]);
-    }
     super.dispose();
   }
 
@@ -76,12 +63,7 @@ class _PageViewPdfState extends State<PageViewPdf> {
           body: PopScope(
             canPop: true,
             onPopInvoked: (bool didPop) async {
-              SystemChrome.setPreferredOrientations(
-                  [DeviceOrientation.portraitUp]);
-              if (Platform.isIOS) {
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.top]);
-              }
+
             },
             child: remoteFilePath.isEmpty
                 ? const CircularProgressIndicator()
@@ -107,22 +89,18 @@ class _PageViewPdfState extends State<PageViewPdf> {
                     setState(() {
                       errorMessage = error.toString();
                     });
-                    print(error.toString());
                   },
                   onPageError: (page, error) {
                     setState(() {
                       errorMessage = '$page: ${error.toString()}';
                     });
-                    print('$page: ${error.toString()}');
                   },
                   onViewCreated: (PDFViewController pdfViewController) {
                     _controller.complete(pdfViewController);
                   },
                   onLinkHandler: (String? uri) {
-                    print('goto uri: $uri');
                   },
                   onPageChanged: (int? page, int? total) {
-                    print('page change: $page/$total');
                     setState(() {
                       currentPage = page ?? 1;
                     });
@@ -163,22 +141,6 @@ class _PageViewPdfState extends State<PageViewPdf> {
                                   top: 15,
                                   child: GestureDetector(
                                     onTap: () {
-                                      SystemChrome
-                                          .setSystemUIOverlayStyle(
-                                          SystemUiOverlayStyle(
-                                            statusBarColor:
-                                            Colors.transparent,
-                                            statusBarIconBrightness:
-                                            Brightness.light,
-                                            statusBarBrightness:
-                                            Brightness.dark,
-                                            systemNavigationBarColor:
-                                            Color(0xff2b3858),
-                                          ));
-                                      SystemChrome
-                                          .setPreferredOrientations([
-                                        DeviceOrientation.portraitUp
-                                      ]);
                                       if (Platform.isIOS) {
                                         SystemChrome
                                             .setEnabledSystemUIMode(
